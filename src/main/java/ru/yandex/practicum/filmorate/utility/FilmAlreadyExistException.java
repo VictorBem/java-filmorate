@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.utility;
 
-public class FilmAlreadyExistException extends Exception{
+public class FilmAlreadyExistException extends RuntimeException{
     public FilmAlreadyExistException(){
     }
 

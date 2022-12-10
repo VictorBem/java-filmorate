@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.utility;
 
-public class FilmNoExistException extends Exception{
+public class FilmNoExistException extends RuntimeException{
     public FilmNoExistException(){
     }
 

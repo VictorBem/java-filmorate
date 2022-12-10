@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.utility.ValidationException;
 import java.time.LocalDate;
 import java.util.*;
 
-@Data
 @Slf4j
 @RestController()
 @RequestMapping("/users")

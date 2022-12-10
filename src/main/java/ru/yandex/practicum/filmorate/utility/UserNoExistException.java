@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.utility;
 
-public class UserNoExistException extends Exception{
+public class UserNoExistException extends RuntimeException{
     public UserNoExistException(){
     }
 

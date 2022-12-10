@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.utility.*;
 import java.time.LocalDate;
 import java.util.*;
 
-@Data
 @Slf4j
 @RestController
 @RequestMapping(value = "/films")
