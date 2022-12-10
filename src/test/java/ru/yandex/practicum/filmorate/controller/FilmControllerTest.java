@@ -71,7 +71,7 @@ class FilmControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест с заполненным полем наименование фильма
@@ -138,7 +138,7 @@ class FilmControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест запроса с описанием менее 200 символов
@@ -205,7 +205,7 @@ class FilmControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест с датой выхода фильма 2001.08.12
@@ -270,7 +270,7 @@ class FilmControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для фильма с положительной длительностью

@@ -65,8 +65,7 @@ class UserControllerTest {
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда отсутствует логин
@@ -91,8 +90,7 @@ class UserControllerTest {
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда логин указан корректно
@@ -130,7 +128,7 @@ class UserControllerTest {
         response = null;
         URI url = URI.create("http://localhost:8080/users");
         //Отправляем запрос с логином в котором содержится пробел
-        User userForTest = new User(1, "@us@er yan///dex.ru@", "mylogin", "Alex", LocalDate.of(1985, 11,10));
+        User userForTest = new User(1, "user yandex.ru", "mylogin", "Alex", LocalDate.of(1985, 11,10));
 
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(gson.toJson(userForTest));
         HttpRequest request = HttpRequest.newBuilder()
@@ -146,8 +144,7 @@ class UserControllerTest {
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда адрес электронной почты не указан
@@ -172,8 +169,7 @@ class UserControllerTest {
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда адрес электронной почты указан корректно
@@ -259,7 +255,7 @@ class UserControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда дата рождения пользователя пустая
@@ -285,7 +281,7 @@ class UserControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда дата рождения пользователя корректна
