@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import ru.yandex.practicum.filmorate.FilmorateApplication;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.io.IOException;
@@ -65,7 +64,7 @@ class UserControllerTest {
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда отсутствует логин
@@ -90,7 +89,7 @@ class UserControllerTest {
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда логин указан корректно
@@ -144,7 +143,7 @@ class UserControllerTest {
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда адрес электронной почты не указан
@@ -169,7 +168,7 @@ class UserControllerTest {
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда адрес электронной почты указан корректно
@@ -255,7 +254,7 @@ class UserControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда дата рождения пользователя пустая
@@ -281,7 +280,7 @@ class UserControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для случая, когда дата рождения пользователя корректна
