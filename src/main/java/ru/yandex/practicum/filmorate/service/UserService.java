@@ -2,17 +2,17 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.utility.EntityNoExistException;
 import ru.yandex.practicum.filmorate.utility.SameUserAndFriendException;
-import ru.yandex.practicum.filmorate.utility.UserNoExistException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
@@ -28,6 +28,7 @@ public class UserService {
         checkUserAndFriend(userId, friendId);
         //Если пользователь решил стать другом самуму себе - не допускаем этого
         if(userId == friendId) {
+            log.error("Невозможно поставить лайк так как указан некорректный id пользователя: " + userId);
             throw new SameUserAndFriendException("Для пользователя и друга указан один и тот же id: " + userId);
         }
 
@@ -78,7 +79,8 @@ public class UserService {
     public List<User> getFriends(int userId) {
         //Проверяем существование пользователя
         if (!checkUser(userId)) {
-            throw new UserNoExistException("Пользователя с id:" + userId + " не существует.");
+            log.error("Пользователя с id:" + userId + " не существует.");
+            throw new EntityNoExistException("Пользователя с id:" + userId + " не существует.");
         }
 
         //Поскольку у друзей пользователя сам пользователь включен в друзья - то выберем только тех пользователей для которых пользователь друг
@@ -92,10 +94,12 @@ public class UserService {
     public List<User> getCommonFriends(int userId, int friendId) {
         //Проверяем существование пользователя
         if (!checkUser(userId)) {
-            throw new UserNoExistException("Пользователя с id:" + userId + " не существует.");
+            log.error("Пользователя с id:" + userId + " не существует.");
+            throw new EntityNoExistException("Пользователя с id:" + userId + " не существует.");
         }
         if (!checkUser(friendId)) {
-            throw new UserNoExistException("Друга с id:" + friendId + " не существует.");
+            log.error("Друга с id:" + friendId + " не существует.");
+            throw new EntityNoExistException("Друга с id:" + friendId + " не существует.");
         }
 
         if(userStorage.getUsers()
@@ -128,11 +132,13 @@ public class UserService {
     public void checkUserAndFriend(int userId, int friendId) {
         //Проверяем, что пользователь существует
         if(!checkUser(userId)) {
-            throw new UserNoExistException("Пользователя с id:" + userId + " не существует.");
+            log.error("Пользователя с id:" + userId + " не существует.");
+            throw new EntityNoExistException("Пользователя с id:" + userId + " не существует.");
         }
         //Проверяем что id пользователя-друга существует
         if(!checkUser(friendId)) {
-            throw new UserNoExistException("Друга пользователя с id:" + friendId + " не существует.");
+            log.error("Друга пользователя с id:" + friendId + " не существует.");
+            throw new EntityNoExistException("Друга пользователя с id:" + friendId + " не существует.");
         }
     }
 

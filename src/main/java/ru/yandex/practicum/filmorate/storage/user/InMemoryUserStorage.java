@@ -1,16 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.utility.UserAlreadyExistException;
-import ru.yandex.practicum.filmorate.utility.UserNoExistException;
+import ru.yandex.practicum.filmorate.utility.EntityNoExistException;
 import ru.yandex.practicum.filmorate.utility.ValidationException;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @Component
+@Getter
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
     //Map для хранения пользователей
@@ -27,7 +28,7 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>((Collection<User>) users.values());
     }
 
-    public User addUser(User user) throws ValidationException, UserAlreadyExistException {
+    public User addUser(User user) throws ValidationException, EntityNoExistException {
         //Проверяем корректность данных пользователя
         if (!isUserCorrect(user)) {
             log.error("Переданы некорректные данные о пользователе, проверти данные полей");
@@ -37,7 +38,7 @@ public class InMemoryUserStorage implements UserStorage {
         //Если пользователь существует, то выбрасываем исключение
         if(users.values().stream().anyMatch(user::equals)) {
             log.error("Переданы некорректные данные о пользователе, проверти данные полей");
-            throw new UserAlreadyExistException("Переданы некорректные данные о пользователи, проверьте данные полей");
+            throw new EntityNoExistException("Переданы некорректные данные о пользователи, проверьте данные полей");
         }
 
         //Если не передано имя пользователя, то в качестве имени используем логин
@@ -53,7 +54,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User changeUser(User user) throws ValidationException, UserNoExistException {
+    public User changeUser(User user) throws ValidationException, EntityNoExistException {
         //Проверяем корректность данных пользователя
         if (!isUserCorrect(user)) {
             log.error("Переданы некорректные данные о пользователе, проверти данные полей");
@@ -65,7 +66,7 @@ public class InMemoryUserStorage implements UserStorage {
             log.debug("Обновлен пользователь id = {}, name = {}", user.getId(), user.getName());
         } else {
             log.debug("Не найден пользователь с id = {} name = {} для обновления", user.getId(), user.getName());
-            throw new UserNoExistException("Переданы некорректные данные о пользователе, проверьте данные полей");
+            throw new EntityNoExistException("Переданы некорректные данные о пользователе, проверьте данные полей");
         }
         return users.get(user.getId());
     }

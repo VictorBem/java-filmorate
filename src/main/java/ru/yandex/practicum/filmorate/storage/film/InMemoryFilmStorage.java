@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.utility.FilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.utility.FilmNoExistException;
+import ru.yandex.practicum.filmorate.utility.EntityAlreadyExistException;
+import ru.yandex.practicum.filmorate.utility.EntityNoExistException;
 import ru.yandex.practicum.filmorate.utility.ValidationException;
 
 import java.time.LocalDate;
@@ -14,7 +13,6 @@ import java.util.*;
 
 @Component
 @Getter
-@Setter
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
@@ -31,7 +29,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film addFilm(Film film) throws ValidationException, FilmAlreadyExistException {
+    public Film addFilm(Film film) throws ValidationException, EntityAlreadyExistException {
         //Проверяем получены ли корректные данные о фильме и если нет выбрасываем исключение и записываем ошибку в лог
         if (!isFilmCorrect(film)) {
             log.error("Переданы некорректные данные о фильме, проверьте данные полей");
@@ -40,7 +38,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         //Если фильм уже существует, то выбрасываем исключение
         if (films.values().stream().anyMatch(film::equals)) {
             log.error("Переданы некорректные данные о фильме, проверьте данные полей");
-            throw new FilmAlreadyExistException("Переданы некорректные данные о фильме, проверьте данные полей");
+            throw new EntityAlreadyExistException("Переданы некорректные данные о фильме, проверьте данные полей");
         }
         //Добавляем фильм в базу фильмов
         film.setId(getFilmId());
@@ -50,7 +48,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film changeFilm(Film film) throws ValidationException, FilmNoExistException {
+    public Film changeFilm(Film film) throws ValidationException, EntityNoExistException {
         //Проверяем корректные ли данные о фильме были получены
         if (!isFilmCorrect(film)) {
             log.error("Переданы некорректные данные о фильме, проверьте данные полей");
@@ -62,7 +60,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.debug("Обновлен фильм id = {}, name = {}", film.getId(), film.getName());
         } else {
             log.debug("Не найден фильм с id = {} name = {} для обновления", film.getId(), film.getName());
-            throw new FilmNoExistException("Переданы некорректные данные о фильме, проверьте данные полей");
+            throw new EntityNoExistException("Переданы некорректные данные о фильме, проверьте данные полей");
         }
         return films.get(film.getId());
     }

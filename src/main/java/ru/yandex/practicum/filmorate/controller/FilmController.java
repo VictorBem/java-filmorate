@@ -14,7 +14,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    //private final InMemoryFilmStorage inMemoryFilmStorage;
     private final FilmService filmService;
 
     @Autowired
@@ -36,13 +35,13 @@ public class FilmController {
 
     //Создаем новый фильм
     @PostMapping
-    public Film addFilm(@Valid @RequestBody Film film) throws ValidationException, FilmAlreadyExistException {
+    public Film addFilm(@Valid @RequestBody Film film) throws ValidationException, EntityAlreadyExistException {
         return filmService.addFilm(film);
     }
 
     //Изменяем фильм
     @PutMapping
-    public Film changeFilm(@Valid  @RequestBody Film film) throws ValidationException, FilmNoExistException {
+    public Film changeFilm(@Valid  @RequestBody Film film) throws ValidationException, EntityNoExistException {
         return filmService.changeFilm(film);
     }
 

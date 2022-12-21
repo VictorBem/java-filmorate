@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.utility.UserAlreadyExistException;
-import ru.yandex.practicum.filmorate.utility.UserNoExistException;
+import ru.yandex.practicum.filmorate.utility.EntityAlreadyExistException;
+import ru.yandex.practicum.filmorate.utility.EntityNoExistException;
 import ru.yandex.practicum.filmorate.utility.ValidationException;
 
 import java.util.*;
@@ -31,13 +31,13 @@ public class UserController {
 
     //Создание пользователя
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) throws ValidationException, UserAlreadyExistException {
+    public User addUser(@Valid @RequestBody User user) throws ValidationException, EntityAlreadyExistException {
         return userService.addUser(user);
     }
 
     //Изменение пользователя
     @PutMapping
-    public User changeUser(@Valid @RequestBody User user) throws ValidationException, UserNoExistException {
+    public User changeUser(@Valid @RequestBody User user) throws ValidationException, EntityNoExistException {
         return userService.changeUser(user);
     }
 
