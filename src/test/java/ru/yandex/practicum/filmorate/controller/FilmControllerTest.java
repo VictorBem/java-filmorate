@@ -9,9 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.yandex.practicum.filmorate.FilmorateApplication;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -21,7 +19,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -71,7 +68,7 @@ class FilmControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест с заполненным полем наименование фильма
@@ -112,15 +109,15 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                "Команда SG-1",
-                "Действие сериала начинается спустя год после событий художественного фильма." +
-                "Сеть устройств, созданных инопланетной расой древних и называемых «звёздными вратами»" +
-                ",позволяет мгновенно перемещаться между различными мирами. Сериал Звёздные врата SG-1" +
-                "— это хроники приключений отряда ЗВ-1 (англ. SG-1), который вместе с другими 24 отрядами" +
-                "(члены которых играют второстепенные и третьестепенные роли в некоторых сериях) исследуют" +
-                "нашу галактику и защищают Землю от различных инопланетных угроз.",
-                LocalDate.of(2007,06,12),
-                43);
+                     "Команда SG-1",
+                 "Действие сериала начинается спустя год после событий художественного фильма." +
+                           "Сеть устройств, созданных инопланетной расой древних и называемых «звёздными вратами»" +
+                           ",позволяет мгновенно перемещаться между различными мирами. Сериал Звёздные врата SG-1" +
+                           "— это хроники приключений отряда ЗВ-1 (англ. SG-1), который вместе с другими 24 отрядами" +
+                           "(члены которых играют второстепенные и третьестепенные роли в некоторых сериях) исследуют" +
+                           "нашу галактику и защищают Землю от различных инопланетных угроз.",
+                           LocalDate.of(2007,06,12),
+                   43);
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
@@ -138,7 +135,7 @@ class FilmControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест запроса с описанием менее 200 символов
@@ -148,11 +145,11 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                "Команда SG-1",
+                    "Команда SG-1",
                 "Действие сериала начинается спустя год после событий художественного фильма." +
-                        "Сеть устройств, созданных инопланетной расой древних и называемых «звёздными вратами»",
-                LocalDate.of(2007,06,12),
-                43);
+                          "Сеть устройств, созданных инопланетной расой древних и называемых «звёздными вратами»",
+                          LocalDate.of(2007,06,12),
+                  43);
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
@@ -184,10 +181,10 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                "Команда SG-1",
-                "Действие сериала начинается спустя год после событий художественного фильма.",
-                LocalDate.of(1600,01,01),
-                43);
+                     "Команда SG-1",
+                 "Действие сериала начинается спустя год после событий художественного фильма.",
+                            LocalDate.of(1600,01,01),
+                    43);
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
@@ -205,7 +202,7 @@ class FilmControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест с датой выхода фильма 2001.08.12
@@ -215,10 +212,10 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                "Команда SG-1",
+                    "Команда SG-1",
                 "Действие сериала начинается спустя год после событий художественного фильма.",
-                LocalDate.of(2001,8,12),
-                43);
+                           LocalDate.of(2001,8,12),
+                           43);
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
@@ -249,10 +246,10 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                "Команда SG-1",
-                "Действие сериала начинается спустя год после событий художественного фильма.",
-                LocalDate.of(1991,7,12),
-                -43);
+                     "Команда SG-1",
+                 "Действие сериала начинается спустя год после событий художественного фильма.",
+                            LocalDate.of(1991,7,12),
+                    -43);
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
@@ -270,7 +267,7 @@ class FilmControllerTest {
             System.out.println(e.getMessage());
         }
         //Проверяем, что сервер ответил 400 - Bad Request
-        assertEquals(500, response.statusCode(), "Сервер вернул некорректный код состояния");
+        assertEquals(400, response.statusCode(), "Сервер вернул некорректный код состояния");
     }
 
     //Тест для фильма с положительной длительностью
@@ -280,10 +277,10 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                "Команда SG-1",
-                "Действие сериала начинается спустя год после событий художественного фильма.",
-                LocalDate.of(1990,01,01),
-                43);
+                     "Команда SG-1",
+                 "Действие сериала начинается спустя год после событий художественного фильма.",
+                            LocalDate.of(1990,01,01),
+                    43);
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);

@@ -1,23 +1,25 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.*;
+
+import javax.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NonNull;
 import ru.yandex.practicum.filmorate.validator.ReleaseDate;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 public class Film {
     //идентификатор фильма
-
     @EqualsAndHashCode.Exclude
     private int id;
+
+    //id пользователей поставивших лайк фильму
+    private final Set<Integer> likes = new HashSet<>();
 
     //название фильма
     @NotBlank(message = "Наименование фильма должно быть заполнено.")

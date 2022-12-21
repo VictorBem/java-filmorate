@@ -1,93 +1,74 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.utility.UserAlreadyExistException;
-import ru.yandex.practicum.filmorate.utility.UserNoExistException;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.utility.EntityAlreadyExistException;
+import ru.yandex.practicum.filmorate.utility.EntityNoExistException;
 import ru.yandex.practicum.filmorate.utility.ValidationException;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
 @RestController()
 @RequestMapping("/users")
 public class UserController {
-    //Map для хранения пользователей
-    private Map<Integer, User> users = new HashMap<>();
-    private int currentUserId = 0;
+    private final UserService userService;
 
-    //метод возвращающий доступный идентификатор пользователя
-    private int getUserId() {
-        return ++currentUserId;
+    @Autowired
+    UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    //Метод для обработки get запросов
+    //Получение списка пользователей
     @GetMapping
-    public List<User> getFilms() {
-        return new ArrayList<>((Collection<User>) users.values());
+    public List<User> getUsers() {
+        return userService.getUsers();
     }
 
-    //Метод для обработки post запросов
+    //Создание пользователя
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) throws ValidationException, UserAlreadyExistException {
-        //Проверяем корректность данных пользователя
-        if (!isUserCorrect(user)) {
-            log.error("Переданы некорректные данные о пользователе, проверти данные полей");
-            throw new ValidationException("Переданы некорректные данные о пользователи, проверьте данные полей");
-        }
-
-        //Если пользователь уже существует, то выбрасываем исключение
-        for (User currentUser : users.values()) {
-            if (currentUser.equals(user)) {
-                log.error("Переданы некорректные данные о пользователе, проверти данные полей");
-                throw new UserAlreadyExistException("Переданы некорректные данные о пользователи, проверьте данные полей");
-            }
-        }
-
-        //Если не передано имя пользователя, то в качестве имени используем логин
-        if(user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-            log.debug("У пользователя не указано Имя, поэтому используем Логин вместо имени id = {}, login = {}", user.getId(), user.getLogin());
-        }
-
-        user.setId(getUserId());
-        users.put(user.getId(), user);
-        log.debug("Создан новый пользователь id = {}, name = {}", user.getId(), user.getName());
-        return users.get(user.getId());
+    public User addUser(@Valid @RequestBody User user) throws ValidationException, EntityAlreadyExistException {
+        return userService.addUser(user);
     }
 
-    //Метод для обработки put запросов
+    //Изменение пользователя
     @PutMapping
-    public User changeUser(@Valid @RequestBody User user) throws ValidationException, UserNoExistException {
-        //Проверяем корректность данных пользователя
-        if (!isUserCorrect(user)) {
-            log.error("Переданы некорректные данные о пользователе, проверти данные полей");
-            throw new ValidationException("Переданы некорректные данные о пользователи, проверьте данные полей");
-        }
-        //Если пользователь уже существует, то обновляем данные пользователя
-        if (users.containsKey(user.getId())) {
-            users.replace(user.getId(), user);
-            log.debug("Обновлен пользователь id = {}, name = {}", user.getId(), user.getName());
-        } else {
-            log.debug("Не найден пользователь с id = {} name = {} для обновления", user.getId(), user.getName());
-            throw new UserNoExistException("Переданы некорректные данные о пользователе, проверьте данные полей");
-        }
-        return users.get(user.getId());
+    public User changeUser(@Valid @RequestBody User user) throws ValidationException, EntityNoExistException {
+        return userService.changeUser(user);
     }
 
-    /*Метод проверяющий корректность пользователя в запросе - создан по ТЗ, но использоваться фактически не будет, так
-      как вся проверка проводится через аннотации указанные для соответсвующих полей класса User и все ошибочные данные
-      будут выявлены до данной проверки.
-     */
-    private boolean isUserCorrect(User user) {
-        return !user.getEmail().isEmpty()
-                && user.getEmail().contains("@")
-                && !user.getLogin().isEmpty()
-                && !user.getLogin().contains(" ")
-                && user.getBirthday().isBefore(LocalDate.now());
+    //Добавляем друга
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addToFriend(@PathVariable("id") int userId, @PathVariable int friendId) {
+        userService.addToFriend(userId, friendId);
     }
+
+    //Удаление друга
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFromFriend(@PathVariable("id") int userId, @PathVariable int friendId) {
+        userService.removeFromFriend(userId, friendId);
+    }
+
+    //Получаем пользователя по его id
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable("id") int userId) {
+        return userService.getUser(userId);
+    }
+
+    //Получаем список друзей пользователя
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable("id") int userId) {
+        return userService.getFriends(userId);
+    }
+
+    //Получаем список общих с другим пользователем
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable("id") int userId, @PathVariable("otherId") int friendId) {
+        return userService.getCommonFriends(userId, friendId);
+    }
+
 }
