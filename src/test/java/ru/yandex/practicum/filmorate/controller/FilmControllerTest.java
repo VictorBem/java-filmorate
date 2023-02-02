@@ -12,6 +12,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import ru.yandex.practicum.filmorate.FilmorateApplication;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Rating;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,6 +22,7 @@ import java.net.http.HttpResponse;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 
 class FilmControllerTest {
 
@@ -50,15 +52,20 @@ class FilmControllerTest {
         response = null;
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
-        Film filmForTest = new Film(1, "","Звездные врата: Команда SG-1", LocalDate.of(2007,06,12), 43);
+        Film filmForTest = new Film(1,
+                "",
+                "Звездные врата: Команда SG-1",
+                LocalDate.of(2007, 06, 12),
+                43,
+                new Rating(1, "G"));
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
                 .uri(url)
-                .header("Content-Type","application/json")
-                .header("Accept-Charset","utf-8")
+                .header("Content-Type", "application/json")
+                .header("Accept-Charset", "utf-8")
                 .build();
 
 
@@ -77,15 +84,20 @@ class FilmControllerTest {
         response = null;
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
-        Film filmForTest = new Film(1, "SG-1","Звездные врата: Команда SG-1", LocalDate.of(2007,06,12), 43);
+        Film filmForTest = new Film(1,
+                "SG-1",
+                "Звездные врата: Команда SG-1",
+                LocalDate.of(2007, 06, 12),
+                43,
+                new Rating(1, "G"));
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
                 .uri(url)
-                .header("Content-Type","application/json")
-                .header("Accept-Charset","utf-8")
+                .header("Content-Type", "application/json")
+                .header("Accept-Charset", "utf-8")
                 .build();
 
 
@@ -109,23 +121,24 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                     "Команда SG-1",
-                 "Действие сериала начинается спустя год после событий художественного фильма." +
-                           "Сеть устройств, созданных инопланетной расой древних и называемых «звёздными вратами»" +
-                           ",позволяет мгновенно перемещаться между различными мирами. Сериал Звёздные врата SG-1" +
-                           "— это хроники приключений отряда ЗВ-1 (англ. SG-1), который вместе с другими 24 отрядами" +
-                           "(члены которых играют второстепенные и третьестепенные роли в некоторых сериях) исследуют" +
-                           "нашу галактику и защищают Землю от различных инопланетных угроз.",
-                           LocalDate.of(2007,06,12),
-                   43);
+                "Команда SG-1",
+                "Действие сериала начинается спустя год после событий художественного фильма." +
+                        "Сеть устройств, созданных инопланетной расой древних и называемых «звёздными вратами»" +
+                        ",позволяет мгновенно перемещаться между различными мирами. Сериал Звёздные врата SG-1" +
+                        "— это хроники приключений отряда ЗВ-1 (англ. SG-1), который вместе с другими 24 отрядами" +
+                        "(члены которых играют второстепенные и третьестепенные роли в некоторых сериях) исследуют" +
+                        "нашу галактику и защищают Землю от различных инопланетных угроз.",
+                LocalDate.of(2007, 06, 12),
+                43,
+                new Rating(1, "G"));
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
                 .uri(url)
-                .header("Content-Type","application/json")
-                .header("Accept-Charset","utf-8")
+                .header("Content-Type", "application/json")
+                .header("Accept-Charset", "utf-8")
                 .build();
 
 
@@ -145,19 +158,20 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                    "Команда SG-1",
+                "Команда SG-1",
                 "Действие сериала начинается спустя год после событий художественного фильма." +
-                          "Сеть устройств, созданных инопланетной расой древних и называемых «звёздными вратами»",
-                          LocalDate.of(2007,06,12),
-                  43);
+                        "Сеть устройств, созданных инопланетной расой древних и называемых «звёздными вратами»",
+                LocalDate.of(2007, 06, 12),
+                43,
+                new Rating(1, "G"));
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
                 .uri(url)
-                .header("Content-Type","application/json")
-                .header("Accept-Charset","utf-8")
+                .header("Content-Type", "application/json")
+                .header("Accept-Charset", "utf-8")
                 .build();
 
 
@@ -181,18 +195,19 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                     "Команда SG-1",
-                 "Действие сериала начинается спустя год после событий художественного фильма.",
-                            LocalDate.of(1600,01,01),
-                    43);
+                "Команда SG-1",
+                "Действие сериала начинается спустя год после событий художественного фильма.",
+                LocalDate.of(1600, 01, 01),
+                43,
+                new Rating(1, "G"));
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
                 .uri(url)
-                .header("Content-Type","application/json")
-                .header("Accept-Charset","utf-8")
+                .header("Content-Type", "application/json")
+                .header("Accept-Charset", "utf-8")
                 .build();
 
 
@@ -212,18 +227,19 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                    "Команда SG-1",
+                "Команда SG-1",
                 "Действие сериала начинается спустя год после событий художественного фильма.",
-                           LocalDate.of(2001,8,12),
-                           43);
+                LocalDate.of(2001, 8, 12),
+                43,
+                new Rating(1, "G"));
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
                 .uri(url)
-                .header("Content-Type","application/json")
-                .header("Accept-Charset","utf-8")
+                .header("Content-Type", "application/json")
+                .header("Accept-Charset", "utf-8")
                 .build();
 
 
@@ -246,18 +262,19 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                     "Команда SG-1",
-                 "Действие сериала начинается спустя год после событий художественного фильма.",
-                            LocalDate.of(1991,7,12),
-                    -43);
+                "Команда SG-1",
+                "Действие сериала начинается спустя год после событий художественного фильма.",
+                LocalDate.of(1991, 7, 12),
+                -43,
+                new Rating(1, "G"));
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
                 .uri(url)
-                .header("Content-Type","application/json")
-                .header("Accept-Charset","utf-8")
+                .header("Content-Type", "application/json")
+                .header("Accept-Charset", "utf-8")
                 .build();
 
 
@@ -277,18 +294,19 @@ class FilmControllerTest {
         URI url = URI.create("http://localhost:8080/films");
         //Отправляем запрос с пустым именем фильма
         Film filmForTest = new Film(1,
-                     "Команда SG-1",
-                 "Действие сериала начинается спустя год после событий художественного фильма.",
-                            LocalDate.of(1990,01,01),
-                    43);
+                "Команда SG-1",
+                "Действие сериала начинается спустя год после событий художественного фильма.",
+                LocalDate.of(1990, 01, 01),
+                43,
+                new Rating(1, "G"));
 
         String task = gson.toJson(filmForTest);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(task);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
                 .uri(url)
-                .header("Content-Type","application/json")
-                .header("Accept-Charset","utf-8")
+                .header("Content-Type", "application/json")
+                .header("Accept-Charset", "utf-8")
                 .build();
 
 
