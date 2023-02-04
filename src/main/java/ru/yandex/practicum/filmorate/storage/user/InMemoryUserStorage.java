@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.utility.EntityNoExistException;
@@ -11,8 +11,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Component
-@Getter
 @Slf4j
+@Qualifier("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
     //Map для хранения пользователей
     private final Map<Integer, User> users = new HashMap<>();
@@ -23,9 +23,16 @@ public class InMemoryUserStorage implements UserStorage {
         return ++currentUserId;
     }
 
+    //Метод для получения всех пользователей из БД
     @Override
     public List<User> getUsers() {
         return new ArrayList<>((Collection<User>) users.values());
+    }
+
+    //Метод для получения пользователя по его id
+    @Override
+    public User getUserById(int id) {
+        return users.get(id);
     }
 
     public User addUser(User user) throws ValidationException, EntityNoExistException {

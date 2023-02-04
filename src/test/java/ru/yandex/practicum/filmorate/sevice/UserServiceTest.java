@@ -88,7 +88,7 @@ public class UserServiceTest {
             System.out.println(e.getMessage());
         }
 
-        //получаем списко друзей пользователя
+        //получаем список друзей пользователя
         url = URI.create("http://localhost:8080/users/1/friends");
         request = HttpRequest.newBuilder()
                 .GET()

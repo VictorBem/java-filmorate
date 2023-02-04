@@ -4,18 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utility.*;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FilmService {
-
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
@@ -31,18 +29,12 @@ public class FilmService {
         verifyFilmAndUser(filmId, userId);
 
         //Если пользователь уже поставил лайк фильму выбрасываем исключение
-        if (filmStorage.getFilms().stream().filter(f -> f.getId() == filmId).findFirst().orElseThrow().getLikes().contains(userId)) {
+        if (filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
             log.error("Пользователь с id: " + userId + " уже поставил лайк фильму с id: " + filmId);
             throw new EntityAlreadyExistException("Пользователь с id: " + userId + " уже поставил лайк фильму с id: " + filmId);
         }
-        //добавляем лайк
-        filmStorage.getFilms()
-                   .stream()
-                   .filter(f -> f.getId() == filmId)
-                   .findFirst()
-                   .orElseThrow()
-                   .getLikes()
-                   .add(userId);
+        //Ставим лайк фильму
+        ((FilmDbStorage) filmStorage).addLike(filmId, userId);
     }
 
     //метод позволяющий пользователю поставить удалить лайк
@@ -51,18 +43,12 @@ public class FilmService {
         verifyFilmAndUser(filmId, userId);
 
         //Если пользователь не ставил лайк фильму выбрасываем исключение
-        if(!filmStorage.getFilms().stream().filter(f -> f.getId() == filmId).findFirst().orElseThrow().getLikes().contains(userId)) {
+        if(!filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
             log.error("Пользователь с id: " + userId + "не ставил лайк фильму с id: " + filmId);
             throw new EntityNoExistException("Пользователь с id: " + userId + "не ставил лайк фильму с id: " + filmId);
         }
         //удаляем лайк
-        filmStorage.getFilms()
-                .stream()
-                .filter(f -> f.getId() == filmId)
-                .findFirst()
-                .orElseThrow()
-                .getLikes()
-                .remove(userId);
+        ((FilmDbStorage) filmStorage).removeLike(filmId, userId);
     }
 
     //получение наиболее популярных фильмов
@@ -72,20 +58,19 @@ public class FilmService {
             log.error("Указано некорректное количество фильмов для выбора, count <= 0");
             throw new IncorrectCountException("Указано некорректное количество фильмов для выбора, count <= 0");
         }
+
         //Невозможно вывести больше фильмов чем есть в базе
-        if(count >= filmStorage.getFilms().size()) {
-            count = filmStorage.getFilms().size();
+        int currentQuantityOfFilms = ((FilmDbStorage) filmStorage).getQuantityOfFilms();
+        if(count >= currentQuantityOfFilms) {
+            count = currentQuantityOfFilms;
         }
 
-        return filmStorage.getFilms()
-                          .stream()
-                          .sorted(Comparator.comparingInt(o -> o.getLikes().size() * -1))
-                          .limit(count)
-                          .collect(Collectors.toList());
+        return ((FilmDbStorage) filmStorage).getMostPopularFilms(count);
     }
 
+    //Метод возвращает фильм по его id
     public Film getFilm(int id) {
-        return filmStorage.getFilms().stream().filter(f -> f.getId() == id).findFirst().orElseThrow();
+        return filmStorage.getFilmById(id);
     }
 
     //получение всех фильмов
@@ -93,27 +78,31 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
+    //Добавление фильма в базу данных
     public Film addFilm(Film film) {
         return filmStorage.addFilm(film);
     }
 
+    //Изменение фильма в базе даных
     public Film changeFilm(Film film) {
         return filmStorage.changeFilm(film);
     }
 
+    //Служебный метод для верификации существования фильма и пользователя
     private void verifyFilmAndUser(int filmId, int userId) {
         //Если фильма нет в базе выбрасываем исключение
-        if(filmStorage.getFilms().stream().noneMatch(f -> f.getId() == filmId)) {
+        try {
+            filmStorage.getFilmById(filmId);
+        } catch (EntityNoExistException | IncorrectCountException exp) {
             log.error("Невозможно поставить лайк так как указан некорректный id фильма: " + filmId);
             throw new EntityNoExistException("Невозможно поставить лайк так как указан некорректный id фильма: " + filmId);
         }
-
         //Если пользователя нет в базе выбрасываем исключение
-        if(userStorage.getUsers().stream().noneMatch(u -> u.getId() == userId)) {
-            log.error("Невозможно поставить лайк так как указан некорректный id пользователя: " + userId);
-            throw new EntityNoExistException("Невозможно поставить лайк так как указан некорректный id пользователя: " + userId);
+        try {
+            userStorage.getUserById(userId);
+        } catch (EntityNoExistException | IncorrectCountException exp) {
+            log.error("Невозможно поставить лайк так как указан некорректный id фильма: " + filmId);
+            throw new EntityNoExistException("Невозможно поставить лайк так как указан некорректный id фильма: " + filmId);
         }
     }
-
-
 }

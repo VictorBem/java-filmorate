@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.utility.EntityAlreadyExistException;
@@ -12,8 +12,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Component
-@Getter
 @Slf4j
+@Qualifier("InMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private int currentFilmId = 0;
@@ -45,6 +45,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.put(film.getId(), film);
         log.debug("Создан новый фильм id = {}, name = {}", film.getId(), film.getName());
         return films.get(film.getId());
+    }
+
+    @Override
+    public Film getFilmById(int id) {
+        return films.get(id);
     }
 
     @Override
