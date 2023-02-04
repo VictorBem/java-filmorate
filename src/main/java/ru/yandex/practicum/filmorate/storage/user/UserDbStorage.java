@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.utility.EntityNoExistException;
+import ru.yandex.practicum.filmorate.utility.IncorrectCountException;
 import ru.yandex.practicum.filmorate.utility.ValidationException;
 
 import java.sql.PreparedStatement;
@@ -15,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 
@@ -36,7 +38,7 @@ public class UserDbStorage implements UserStorage {
     public List<User> getUsers() {
         //Запрос для получения всех пользователей
         String sql = "SELECT * " +
-                     "FROM USERS;";
+                "FROM USERS;";
 
         List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs));
 
@@ -46,9 +48,106 @@ public class UserDbStorage implements UserStorage {
 
         //Добавляем каждому пользователю его друзей
         sql = "SELECT * " +
-              "FROM FRIEND;";
+                "FROM FRIEND;";
 
         jdbcTemplate.query(sql, (rs, rowNum) -> addFriendToUser(users, rs));
+
+        return users;
+    }
+
+    //Метод для получения пользователя по его id
+    @Override
+    public User getUserById(int id) {
+        //Запрос для получения всех пользователей
+        String sql = "SELECT * " +
+                "FROM USERS " +
+                "WHERE ID = ?;";
+
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), id);
+
+        if(users.isEmpty()) {
+            log.error("Пользователь с id = " + id + "отсутствует в базе данных");
+            throw new EntityNoExistException("Пользователь с id = " + id + "отсутствует в базе данных");
+        } else if (users.size() != 1) {
+            log.error("Более одного пользователя с id = " + id);
+            throw new IncorrectCountException("Более одного пользователя с id = " + id);
+        }
+
+        //Добавляем каждому пользователю его друзей
+        sql = "SELECT * " +
+                "FROM FRIEND " +
+                "WHERE USER_ID_FROM = ?;";
+
+        jdbcTemplate.query(sql, (rs, rowNum) -> addFriendToUser(users, rs), id);
+
+        return users.get(0);
+    }
+
+    //Метод для получения пользователей по списку их идентификаторов
+    public List<User> getUserByIds(Set<Integer> ids) {
+        if(ids == null || ids.size() == 0) {
+            log.info("Передан пустой список идентификаторов пользователей");
+            return Collections.emptyList();
+        }
+
+        //Формируем строку с id пользователей для sql запроса
+        StringBuilder userIds = new StringBuilder();
+        for(int currentId = 0 ; currentId < ids.size() ; currentId++) {
+            if (currentId == 0 || currentId == ids.size() - 1) {
+                userIds.append(ids.iterator().next().toString());
+            } else {
+                userIds.append(", ").append(ids.iterator().next().toString());
+            }
+        }
+        //Запрос для получения всех пользователей
+        String sql = "SELECT * " +
+                "FROM USERS " +
+                "WHERE ID IN ( ? );";
+
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs),  userIds.toString());
+
+        if (users.isEmpty()) {
+            log.error("Не найдено пользователей с id: " + userIds);
+            throw new EntityNoExistException("Не найдено пользователей с id: " + userIds);
+        }
+
+        //Добавляем каждому пользователю его друзей
+        sql = "SELECT * " +
+                "FROM FRIEND " +
+                "WHERE USER_ID_FROM IN ( ? );";
+
+        jdbcTemplate.query(sql, (rs, rowNum) -> addFriendToUser(users, rs), userIds.toString());
+
+        return users;
+    }
+
+
+    //Метод возвращает список друзей пользователя по ИД пользователя
+    public List<User> getFriends(int userId) {
+        //Запрос для получения всех друзей пользователя
+        String sql = "SELECT * " +
+                "FROM USERS " +
+                "WHERE ID IN (SELECT USER_ID_TO " +
+                "             FROM FRIEND " +
+                "             WHERE USER_ID_FROM = ?);";
+
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), userId);
+
+        if (users.isEmpty()) {
+            log.info("У Пользователь с id = " + userId + "нет друзей");
+            return Collections.emptyList();
+        }
+
+        //Добавляем каждому пользователю его друзей
+        sql = "SELECT * " +
+                "FROM FRIEND " +
+                "WHERE USER_ID_FROM IN (SELECT ID " +
+                "                       FROM USERS " +
+                "                       WHERE ID IN (SELECT USER_ID_TO " +
+                "                                    FROM FRIEND " +
+                "                                    WHERE USER_ID_FROM = ?))";
+
+        jdbcTemplate.query(sql, (rs, rowNum) -> addFriendToUser(users, rs), userId);
 
         return users;
     }
@@ -68,7 +167,7 @@ public class UserDbStorage implements UserStorage {
         int currentUserId = rs.getInt("user_id_from");
         int newFriendId = rs.getInt("user_id_to");
 
-        if(newFriendId <= 0) {
+        if (newFriendId <= 0) {
             log.error("Id пользователя должно быть больше нуля, передано newFriendId: " + newFriendId);
             throw new ValidationException("Id пользователя должно быть больше нуля, передано newFriendId: " + newFriendId);
         }
@@ -77,12 +176,11 @@ public class UserDbStorage implements UserStorage {
             throw new ValidationException("Id пользователя должно быть больше нуля, передано currentUserId: " + currentUserId);
         }
 
-        users.stream()
-             .filter(u -> u.getId() == currentUserId)
-             .findAny()
-             .orElseThrow()
-             .getFriends()
-             .add(newFriendId);
+        try {
+            users.stream().filter(u -> u.getId() == currentUserId).findAny().orElseThrow().getFriends().add(newFriendId);
+        } catch (NoSuchElementException exp) {
+            log.error("Пользователь с id: " + currentUserId + " не найден");
+        }
 
         return newFriendId;
     }
@@ -92,20 +190,20 @@ public class UserDbStorage implements UserStorage {
     public User addUser(User user) {
 
         //Если пользователь существует, то выбрасываем исключение
-        if(getUsers().stream().anyMatch(user::equals)) {
+        if (getUsers().stream().anyMatch(user::equals)) {
             log.error("Переданы некорректные данные о пользователе, проверти данные полей");
             throw new EntityNoExistException("Переданы некорректные данные о пользователи, проверьте данные полей");
         }
 
         //Если не передано имя пользователя, то в качестве имени используем логин
-        if(user.getName() == null || user.getName().isEmpty()) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
             log.debug("У пользователя не указано Имя, поэтому используем Логин вместо имени id = {}, login = {}", user.getId(), user.getLogin());
         }
 
         //Добавляем нового пользователя в таблицу хранящую пользователей (USERS)
         String sql = "INSERT INTO USERS (EMAIL, LOGIN, NAME, BIRTHDAY) " +
-                     "VALUES (?, ?, ?, ?);";
+                "VALUES (?, ?, ?, ?);";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -124,7 +222,7 @@ public class UserDbStorage implements UserStorage {
 
         //Сохраняем в таблице FRIEND информацию о друзьях пользователя
         String sqlInsert = "INSERT INTO FRIEND (USER_ID_FROM, USER_ID_TO, STATUS_ID) " +
-                           "VALUES (?, ?, ?);";
+                "VALUES (?, ?, ?);";
 
         for(int currentFriend : user.getFriends()) {
             jdbcTemplate.update(sqlInsert, user.getId(), currentFriend, INITIAL_STATUS_ID_OF_FRIENDSHIP);
@@ -143,34 +241,34 @@ public class UserDbStorage implements UserStorage {
         }
         //Формируем и выполняем запрос на обновление записи пользователя
         String sql = "UPDATE USERS " +
-                     "SET EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY =? " +
-                     "WHERE ID = ?;";
+                "SET EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY =? " +
+                "WHERE ID = ?;";
 
         jdbcTemplate.update(sql,
-                            user.getEmail(),
-                            user.getLogin(),
-                            user.getName(),
-                            user.getBirthday(),
-                            user.getId());
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday(),
+                user.getId());
 
         //удаляем существующие записи по друзьям из таблицы и вносим новые
         sql = "DELETE FROM FRIEND " +
-              "WHERE USER_ID_FROM = ?;";
+                "WHERE USER_ID_FROM = ?;";
 
         jdbcTemplate.update(sql, user.getId());
 
         //добавляем обновленных друзей
         sql = "INSERT INTO FRIEND (USER_ID_FROM, USER_ID_TO, STATUS_ID) " +
-              "VALUES (?, ?, ?);";
+                "VALUES (?, ?, ?);";
 
         Set<Integer> newFriends = user.getFriends();//.stream().map(Friend::getId).collect(Collectors.toSet());
         user.getFriends().removeAll(user.getFriends());
 
         for(int currentId : newFriends) {
             jdbcTemplate.update(sql,
-                                user.getId(),
-                                currentId,
-                                INITIAL_STATUS_ID_OF_FRIENDSHIP);
+                    user.getId(),
+                    currentId,
+                    INITIAL_STATUS_ID_OF_FRIENDSHIP);
             user.getFriends().add(currentId);
         }
 
@@ -180,7 +278,7 @@ public class UserDbStorage implements UserStorage {
     //Метод добавляет пользователя в друзья
     public void addToFriend(int userId, int friendId) {
         String sql = "INSERT INTO FRIEND (USER_ID_FROM, USER_ID_TO, STATUS_ID) " +
-                     "VALUES (?, ?, ?);";
+                "VALUES (?, ?, ?);";
 
         jdbcTemplate.update(sql, userId, friendId, INITIAL_STATUS_ID_OF_FRIENDSHIP);
     }
@@ -188,8 +286,8 @@ public class UserDbStorage implements UserStorage {
     //Метод удаляет пользователя из друзей
     public void removeFromFriend(int userId, int friendId) {
         String sql = "DELETE FROM FRIEND " +
-                     "WHERE USER_ID_FROM = ? " +
-                     "AND USER_ID_TO = ?;";
+                "WHERE USER_ID_FROM = ? " +
+                "AND USER_ID_TO = ?;";
 
         jdbcTemplate.update(sql, userId, friendId);
     }
@@ -197,11 +295,22 @@ public class UserDbStorage implements UserStorage {
     //Метод подтверждает дружбу
     public void confirmFriend(int userId, int friendId) {
         String sql = "UPDATE FRIEND " +
-                     "SET STATUS_ID = ? " +
-                     "WHERE USER_ID_FROM = ? " +
-                     "  AND USER_ID_TO = ?;";
+                "SET STATUS_ID = ? " +
+                "WHERE USER_ID_FROM = ? " +
+                "  AND USER_ID_TO = ?;";
 
         jdbcTemplate.update(sql, CONFIRMED_STATUS_ID_OF_FRIENDSHIP, userId, friendId);
     }
 
+    //Метод проверяет есть ли пользователь в базе данных
+    public boolean checkUser(int id) {
+        //Запрос для получения всех пользователей
+        String sql = "SELECT * " +
+                "FROM USERS " +
+                "WHERE ID = ?;";
+
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), id);
+        //Если пользователя не существует в базе данных, то возвращаем false
+        return !users.isEmpty();
+    }
 }

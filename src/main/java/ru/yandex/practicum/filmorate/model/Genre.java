@@ -25,7 +25,7 @@ public class Genre implements Comparable<Genre>{
 
     @Override
     public int compareTo(Genre o) {
-       return this.getId() - o.getId();
+        return this.getId() - o.getId();
     }
 
     @Override
